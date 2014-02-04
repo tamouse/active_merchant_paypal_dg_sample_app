@@ -1,0 +1,20 @@
+%form{:action => '/subscribe', :method => 'post'}
+  %label{:for => 'name'} Name:
+  %input.form-field{:name => 'first_name', :type => 'text', :placeholder => 'First Name'}
+  %input.form-field{:name => 'last_name', :type => 'text', :placeholder => 'Last Name'}
+  %br
+  %label{:for => 'number'} Card Number:
+  %input.form-field{:name => 'number', :type => 'text', :placeholder => 'Credit Card Number'}
+  %br
+  %label{:for => 'cvv'} CVV:
+  %input.form-field{:name => 'cvv', :type => 'text', :placeholder => "CVV"}
+  %br
+  %label{:for => 'expires'}  Expires:
+  %input.form-field{:name => 'exp_month', :type => 'text'}
+  %input.form-field{:name => 'exp_year',  :type => 'text'}
+  %br
+  %label{:for => 'post_code'}  Billing Post Code:
+  %input.form-field{:name => 'post_code', :type => 'text'}
+  %br
+  %input.form-button{:name => 'submit', :type => 'submit'}
+    
