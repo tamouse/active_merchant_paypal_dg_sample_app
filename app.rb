@@ -7,6 +7,8 @@ $SandboxFlag = true
 class ActiveMerchantPaypalApp < Sinatra::Base
 
   enable :logging
+  set :port, 8900
+  set :environment, :development
 
   CONFIG = YAML.load(File.read(
       File.expand_path("_paypal_business_api_credentials.yml")
@@ -38,7 +40,8 @@ class ActiveMerchantPaypalApp < Sinatra::Base
     logger.info "POST /subscribe #{params.inspect}"
 
     #return_url = "http://active_merchant_sample_app.192.168.1.72.xip.io/confirm"
-    return_url ="http://active_merchant_sample_app.10.105.5.193.xip.io/confirm"
+    #return_url ="http://active_merchant_sample_app.10.105.5.193.xip.io/confirm"
+    return_url = "http://paypal.tamouse.com/confirm"
     cancel_url = return_url
 
     items = [{
@@ -57,7 +60,6 @@ class ActiveMerchantPaypalApp < Sinatra::Base
       :cancel_return_url => cancel_url,
       :items => items
     }
-
     logger.info "Options: #{options.inspect}"
 
     result = GATEWAY.setup_purchase(249, options)
@@ -74,10 +76,12 @@ class ActiveMerchantPaypalApp < Sinatra::Base
   end
 
   get '/confirm' do
+    logger.info "GET /confirm #{params.inspect}"
     params.inspect
   end
   
   post '/confirm' do
+    logger.info "POST /confirm #{params.inspect}"
     params.inspect
   end
   

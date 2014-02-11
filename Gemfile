@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 gem "sinatra"
 gem "activemerchant"
+gem "haml"
 
 group :development, :test do
   gem "pry"
