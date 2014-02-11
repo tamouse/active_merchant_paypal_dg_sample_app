@@ -2,6 +2,8 @@ require 'sinatra/base'
 require 'active_merchant'
 require 'yaml'
 
+$SandboxFlag = true
+
 class ActiveMerchantPaypalApp < Sinatra::Base
 
   enable :logging
@@ -10,6 +12,16 @@ class ActiveMerchantPaypalApp < Sinatra::Base
       File.expand_path("_paypal_business_api_credentials.yml")
       ))
 
+  if $SandboxFlag == true
+    API_ENDPOINT = "https://api-3t.sandbox.paypal.com/nvp"
+    PAYPAL_URL = "https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token="
+    PAYPAL_DG_URL = "https://www.sandbox.paypal.com/incontext?token="
+  else
+    API_ENDPOINT = "https://api-3t.paypal.com/nvp"
+    PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token="
+    PAYPAL_DG_URL = "https://www.paypal.com/incontext?token="
+  end
+  
   ActiveMerchant::Billing::Base.mode = :test
   GATEWAY = ActiveMerchant::Billing::PaypalDigitalGoodsGateway.new(
     :login => CONFIG['username'],
@@ -52,7 +64,13 @@ class ActiveMerchantPaypalApp < Sinatra::Base
     
     logger.info "Result: #{result.inspect}"
 
-    result.inspect
+    if result['ACK'].downcase.include? "success"
+      token = result['token']
+      redirect to("#{PAYPAL_DG_URL}#{token}")
+    else
+      "<h1>ERROR!</h1><p>#{result.inspect}</p>"
+    end
+
   end
 
   get '/confirm' do
