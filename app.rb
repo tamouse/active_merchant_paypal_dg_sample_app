@@ -1,60 +1,66 @@
-require 'sinatra'
+require 'sinatra/base'
 require 'active_merchant'
 require 'yaml'
 
-CONFIG = YAML.load(File.read(
-    File.expand_path("../paypal_api_signature.yml")
-    ))
+class ActiveMerchantPaypalApp < Sinatra::Base
 
-STDERR.puts CONFIG
+  enable :logging
 
-ActiveMerchant::Billing::Base.mode = :test
-GATEWAY = ActiveMerchant::Billing::PaypalDigitalGoodsGateway.new(
-  :login => CONFIG['API_Username'],
-  :password => CONFIG['API_Password'],
-  :signature => CONFIG['Signature']
-  )
+  CONFIG = YAML.load(File.read(
+      File.expand_path("_paypal_business_api_credentials.yml")
+      ))
 
-get '/' do
-  haml :index, :format => :html5, :layout => :default
-end
-
-post '/subscribe' do
-  credit_card = ActiveMerchant::Billing::CreditCard.new(
-    :first_name => params['first_name'],
-    :last_name => params["last_name"],
-    :number => params["number"],
-    :month => params["exp_month"],
-    :year => params["exp_year"],
-    :verification_value => params["cvv"]
+  ActiveMerchant::Billing::Base.mode = :test
+  GATEWAY = ActiveMerchant::Billing::PaypalDigitalGoodsGateway.new(
+    :login => CONFIG['username'],
+    :password => CONFIG['password'],
+    :signature => CONFIG['signature']
     )
 
-  if credit_card.valid?
-    amount = 200                # two dollah
-    recurring_profile = GATEWAY.recurring(amount,
-      credit_card,
-      {
-        :period => "Month",
-        :frequency => 1,
-        :start_date => Date.today,
-        :description => "Monthly Brewtoad Subscription"
-      }
-      )
-    if recurring_profile.success?
-      message = "Successfully charged %.2f to the credit card %s" % [ (amount.to_f / 100.0), credit_card.display_number ]
-    else
-      message = "Charge failed: #{recurring_profile.message}"
-    end
-    
+  get '/' do
+    logger.info "GET /"
+    haml :index, :format => :html5, :layout => :default
   end
 
-  haml( :subscribe_complete,
-        :format => :html5,
-        :layout => :default,
-        :locals => {
-          :message => message,
-          :parameters => params.inspect,
-          :credit_card => credit_card.inspect,
-          :recurring_profile => recurring_profile.inspect}
-        )
+  post '/subscribe' do
+    logger.info "POST /subscribe #{params.inspect}"
+
+    #return_url = "http://active_merchant_sample_app.192.168.1.72.xip.io/confirm"
+    return_url ="http://active_merchant_sample_app.10.105.5.193.xip.io/confirm"
+    cancel_url = return_url
+
+    items = [{
+        :name => 'Subscription',
+        :number => "1",
+        :quantity => "1",
+        :amount => 249,
+        :description => "Monthly Brewtoad Subscription",
+        :category => "Digital"
+      }]
+
+    options = {
+      :ip => "127.0.0.1",
+      :description => "Paypal Test Transaction",
+      :return_url => return_url,
+      :cancel_return_url => cancel_url,
+      :items => items
+    }
+
+    logger.info "Options: #{options.inspect}"
+
+    result = GATEWAY.setup_purchase(249, options)
+    
+    logger.info "Result: #{result.inspect}"
+
+    result.inspect
+  end
+
+  get '/confirm' do
+    params.inspect
+  end
+  
+  post '/confirm' do
+    params.inspect
+  end
+  
 end

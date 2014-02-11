@@ -1,20 +1,18 @@
-%form{:action => '/subscribe', :method => 'post'}
-  %label{:for => 'name'} Name:
-  %input.form-field{:name => 'first_name', :type => 'text', :placeholder => 'First Name'}
-  %input.form-field{:name => 'last_name', :type => 'text', :placeholder => 'Last Name'}
-  %br
-  %label{:for => 'number'} Card Number:
-  %input.form-field{:name => 'number', :type => 'text', :placeholder => 'Credit Card Number'}
-  %br
-  %label{:for => 'cvv'} CVV:
-  %input.form-field{:name => 'cvv', :type => 'text', :placeholder => "CVV"}
-  %br
-  %label{:for => 'expires'}  Expires:
-  %input.form-field{:name => 'exp_month', :type => 'text'}
-  %input.form-field{:name => 'exp_year',  :type => 'text'}
-  %br
-  %label{:for => 'post_code'}  Billing Post Code:
-  %input.form-field{:name => 'post_code', :type => 'text'}
-  %br
-  %input.form-button{:name => 'submit', :type => 'submit'}
-    
+%form{:action => "/subscribe", :method => "POST"}
+  %input{:type => "image", :name => "paypal_submit",
+         :id => "paypal_submit",
+         :src => "https://www.paypal.com/en_US/i/btn/btn_dg_pay_w_paypal.gif",
+         :border => '0',
+         :align => 'top',
+         :alt => 'Pay with PayPal'}
+
+
+%script{:src=>'https://www.paypalobjects.com/js/external/dg.js'}
+%script
+  :javascript
+    var dg = new PAYPAL.apps.DGFlow(
+    {
+    trigger: 'paypal_submit',
+    expType: 'instant'
+    //PayPal will decide the experience type for the buyer based on his/her 'Remember me on your computer' option.
+    });
