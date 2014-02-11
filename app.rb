@@ -66,8 +66,9 @@ class ActiveMerchantPaypalApp < Sinatra::Base
     
     logger.info "Result: #{result.inspect}"
 
-    if result['ACK'].downcase.include? "success"
-      token = result['token']
+    if result.success?
+      token = result.token
+      logger.info "Token: #{token}"
       redirect to("#{PAYPAL_DG_URL}#{token}")
     else
       "<h1>ERROR!</h1><p>#{result.inspect}</p>"
